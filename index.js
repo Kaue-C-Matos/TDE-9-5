@@ -1,14 +1,6 @@
-const express = require("express");
-const server = express();
-const router = express.Router();
-const port = 3000; //N° da porta
+const server = require("./server")
 
-server.use(router);
-
+const port = 8080
 server.listen(port, ()=>{
     console.log(`server rodando na porta ${port}`)
-})
-
-router.get("/health", (req, res)=>{
-    res.json("server is running")
 })
