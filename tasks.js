@@ -1,49 +1,40 @@
-const express = require('express')
+const express = require('express');
+const { saveTask, getAlltasks, updateTask, deleteTask } = require('./database/tasks');
 const router = express.Router();
 
-let tasks = [
-    {
-        id: 1, 
-        nome:"comprar leite", 
-        descricao: "ir até a esquina e comprar leite", 
-        isDone: false
-    }
-]
-
-router.get("/tasks", (req, res)=>{
+router.get("/tasks", async (req, res)=>{
+    const tasks = await getAlltasks();
     res.json({tasks})
 })
 
-router.post("/tasks", (req, res)=>{
-
+router.post("/tasks", async (req, res)=>{
     const newTask={
-        id: tasks.length + 1,
         nome: req.body.nome,
         descricao: req.body.descricao,
         isDone: req.body.isDone
     }
-    tasks.push({newTask});
+    const savedTask = await saveTask(newTask);
     res.json({
-        newTask
+        savedTask
     })
 })
 
-router.put("/tasks/:id", (req, res)=>{
+router.put("/tasks/:id", async (req, res)=>{
     const id = Number(req.params.id);
-    const task = tasks.find((task)=>{
-        return task.id === id
+    const product = {
+    nome: req.body.nome,
+    descricao: req.body.descricao,
+    isDone: req.body.isDone
+    }
+    const updatedTask = await updateTask(id, product)
+    res.json({
+        product: updatedTask
     })
-    task.nome = req.body.nome
-    task.descricao = req.body.descricao
-    task.isDone = req.body.isDone
-    res.json({task})
 })
 
-router.delete("/tasks/:id", (req, res)=>{
+router.delete("/tasks/:id", async (req, res)=>{
     const id = Number(req.params.id);
-    tasks = tasks.filter(task=>{
-        return task.id !== id
-    })
+    await deleteTask(id)
     res.status(204).send();
 })
 
