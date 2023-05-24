@@ -1,6 +1,8 @@
 const express = require('express');
-const { saveTask, getAlltasks, updateTask, deleteTask } = require('./database/tasks');
+const { saveTask, getAlltasks, updateTask, deleteTask } = require('../database/tasks');
 const router = express.Router();
+
+
 
 router.get("/tasks", async (req, res)=>{
     const tasks = await getAlltasks();
