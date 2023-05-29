@@ -1,24 +1,31 @@
 const express = require("express")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
-const { findUserByEmail, saveUser } = require("../database/users");
+const { findUserByEmail, saveUser, findUserById } = require("../database/users");
+const auth = require("../middleware/auth");
 const router = express.Router();
 
 router.post("/register", async(req, res)=>{
     try{
         const emailIsAlredyUsed = await findUserByEmail(req.body.email)
+
         if (emailIsAlredyUsed)
             return res.status(400).json({
                 message: "Este e-mail já está em uso"
             })
+
         const hashedPassword = bcrypt.hashSync(req.body.senha, 10);
+
         const user = {
             nome: req.body.nome,
             email: req.body.email,
             senha: hashedPassword
         }
+
         const savedUser = await saveUser(user)
+
         delete savedUser.senha
+        
         res.status(201).json({
             user: savedUser
         })
@@ -48,6 +55,12 @@ router.post("/login", async (req, res)=>{
     }, process.env.SECRET)
 
     res.json({sucess: true, token})
+})
+
+router.get("/profile", auth ,async (req, res) =>{
+    const user = await findUserById(req.user.userId)
+    delete user.senha
+    res.json({user})
 })
 
 module.exports = {router}

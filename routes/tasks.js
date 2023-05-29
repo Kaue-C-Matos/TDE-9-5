@@ -1,15 +1,16 @@
 const express = require('express');
 const { saveTask, getAlltasks, updateTask, deleteTask } = require('../database/tasks');
+const auth = require('../middleware/auth');
 const router = express.Router();
 
 
 
-router.get("/tasks", async (req, res)=>{
+router.get("/tasks", auth, async (req, res)=>{
     const tasks = await getAlltasks();
     res.json({tasks})
 })
 
-router.post("/tasks", async (req, res)=>{
+router.post("/tasks", auth, async (req, res)=>{
     const newTask={
         nome: req.body.nome,
         descricao: req.body.descricao,
@@ -21,7 +22,7 @@ router.post("/tasks", async (req, res)=>{
     })
 })
 
-router.put("/tasks/:id", async (req, res)=>{
+router.put("/tasks/:id", auth, async (req, res)=>{
     const id = Number(req.params.id);
     const product = {
     nome: req.body.nome,
@@ -34,7 +35,7 @@ router.put("/tasks/:id", async (req, res)=>{
     })
 })
 
-router.delete("/tasks/:id", async (req, res)=>{
+router.delete("/tasks/:id", auth,  async (req, res)=>{
     const id = Number(req.params.id);
     await deleteTask(id)
     res.status(204).send();
