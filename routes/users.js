@@ -1,12 +1,20 @@
 const express = require("express")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
+const z = require('zod')
 const { findUserByEmail, saveUser, findUserById } = require("../database/users");
 const auth = require("../middleware/auth");
 const router = express.Router();
 
+const userSchema = z.object({
+    nome: z.string().min(3),
+    email: z.string().email(),
+    senha: z.string().min(6)
+})
+
 router.post("/register", async(req, res)=>{
     try{
+        const user = userSchema.parse(req.body)
         const emailIsAlredyUsed = await findUserByEmail(req.body.email)
 
         if (emailIsAlredyUsed)
@@ -15,12 +23,7 @@ router.post("/register", async(req, res)=>{
             })
 
         const hashedPassword = bcrypt.hashSync(req.body.senha, 10);
-
-        const user = {
-            nome: req.body.nome,
-            email: req.body.email,
-            senha: hashedPassword
-        }
+        user.senha =hashedPassword
 
         const savedUser = await saveUser(user)
 
@@ -30,10 +33,11 @@ router.post("/register", async(req, res)=>{
             user: savedUser
         })
     }
-    catch (error){
-        res.status(500).json({
-            message: "Erro no servidor"
+    catch(err){
+        if (err instanceof z.ZodError) return res.status(422).json ({
+            message: err.errors
         })
+        res.status(500).json({message: "Erro no servidor"})
     }
     
 })
